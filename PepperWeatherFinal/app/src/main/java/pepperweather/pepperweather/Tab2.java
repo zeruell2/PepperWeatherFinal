@@ -66,22 +66,12 @@ public class Tab2 extends TabFragment {
         // sobreescribiendo la informacion harcodeada
         new FetchWeatherTask().execute("94043");
 
-        ArrayList<Item> forecast = new ArrayList<>();
+        List<Weather> forecast = new ArrayList<>();
 
-        forecast.add(new Item("","",""));
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
 
         adapter=new MyAdapter(getActivity(),R.layout.list_row,forecast);
         listView.setAdapter(adapter);
-/*
-        adapter = new ArrayAdapter<String>(
-                getActivity(),
-                R.layout.list_item_forecast,
-                R.id.list_item_forecast_textview,
-                forecast
-        );
-
-*/
 
         return rootView;
     }
@@ -90,7 +80,7 @@ public class Tab2 extends TabFragment {
     /**
      * FetchWeatherTask AsyncTask
      */
-    public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
+    public class FetchWeatherTask extends AsyncTask<String, Void, List<Weather>> {
 
         private String TAG = FetchWeatherTask.class.getSimpleName();
 
@@ -100,7 +90,7 @@ public class Tab2 extends TabFragment {
         int days = 7;
 
         @Override
-        protected String[] doInBackground(String... strings) {
+        protected List<Weather> doInBackground(String... strings) {
             postCode = strings[0];
 
             String forecastJson = null;
@@ -135,13 +125,10 @@ public class Tab2 extends TabFragment {
         }
 
         @Override
-        protected void onPostExecute(String[] results) {
+        protected void onPostExecute(List<Weather> results) {
             if(results != null) {
                 adapter.clear();
-                for(String forecast : results) {
-                    adapter.add(new Item("Lion",forecast,"test"));
-                }
-                adapter.notifyDataSetChanged();
+                adapter.setItems(results);
             }
         }
         public static final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast?q=%s&units=metric&cnt=7&appid=6e8a9626d02c7c26f0d754fa9ccb1a49";
@@ -214,20 +201,6 @@ public class Tab2 extends TabFragment {
             return forecastJsonStr;
         }
 
-
-
-        /**
-         * Prepare the weather high/lows for presentation.
-         */
-        private String formatHighLows(double high, double low) {
-            // For presentation, assume the user doesn't care about tenths of a degree.
-            long roundedHigh = Math.round(high);
-            long roundedLow = Math.round(low);
-
-            String highLowStr = roundedHigh+"°/" + roundedLow+"°";
-            return highLowStr;
-        }
-
         /**
          * Take the String representing the complete forecast in JSON Format and
          * pull out the data we need to construct the Strings needed for the wireframes.
@@ -235,7 +208,7 @@ public class Tab2 extends TabFragment {
          * Fortunately parsing is easy:  constructor takes the JSON string and converts it
          * into an Object hierarchy for us.
          */
-        private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays) throws JSONException {
+        private List<Weather> getWeatherDataFromJson(String forecastJsonStr, int numDays) throws JSONException {
 
             // These are the names of the JSON objects that need to be extracted.
             final String OWM_LIST = "list";
@@ -263,7 +236,8 @@ public class Tab2 extends TabFragment {
             // now we work exclusively in UTC
             Calendar gc = new GregorianCalendar();
 
-            String[] resultStrs = new String[numDays];
+            List<Weather> resultList = new ArrayList<Weather>(numDays);
+
             for(int i = 0; i < weatherArray.length(); i++) {
                 // For now, using the format "Day, description, hi/low"
                 String day;
@@ -289,10 +263,9 @@ public class Tab2 extends TabFragment {
 
                 int id = description / 100;
                 String icon = "";
+
                 if(description == 800){
-
                     icon = getActivity().getString(R.string.weather_sunny);
-
 
                 } else {
                     switch(id) {
@@ -308,10 +281,8 @@ public class Tab2 extends TabFragment {
                             break;
                         case 5 : icon = getActivity().getString(R.string.weather_rainy);
                             break;
-
                     }
                 }
-
 
                 // Temperatures are in a child object called "temp".  Try not to name variables
                 // "temp" when working with temperature.  It confuses everybody.
@@ -319,18 +290,16 @@ public class Tab2 extends TabFragment {
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
-                highAndLow = formatHighLows(high, low);
-                resultStrs[i] = day + icon  + highAndLow;
+                Weather weather = new Weather();
+                weather.day = day;
+                weather.icon = icon;
+                weather.high = high;
+                weather.low = low;
 
-
-
-
-
-
-
+                resultList.add(i, weather);
             }
 
-            return resultStrs;
+            return resultList;
 
         }
     }
