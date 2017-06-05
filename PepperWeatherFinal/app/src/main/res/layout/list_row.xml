@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/weather_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorText"
+        android:textSize="14sp"
+        tools:text="Min 26°C" />
+    <TextView
+        android:id="@+id/weather_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/colorText"
+        android:textSize="23sp"
+        android:visibility="visible"
+        tools:text="sun" />
+    <TextView
+        android:id="@+id/weather_maxMin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="13dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/colorText"
+        android:textSize="14sp"
+        tools:text="Max 26°C" />
+
+</LinearLayout>
